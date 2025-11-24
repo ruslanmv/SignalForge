@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+
+name: ⚙️ Configuration Help
+description: Need help with configuration
+title: "[Config] "
+labels: ["configuration", "help"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help with configuration? Please provide as much detail as possible.
+
+        Before posting, please check the [README](https://github.com/ruslanmv/SignalForge/blob/main/README.md) for common configuration questions.
+
+  - type: dropdown
+    id: config-type
+    attributes:
+      label: 🏷️ Configuration Type
+      options:
+        - Basic configuration (config.yaml)
+        - Notification configuration (webhooks)
+        - Deployment configuration (Docker, GitHub Actions)
+        - Keyword configuration (frequency_words.txt)
+        - Environment configuration (Python, dependencies)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 🖥️ Environment
+      options:
+        - Local execution
+        - Docker
+        - GitHub Actions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: 📝 Problem Description
+      description: Describe the configuration issue you're facing
+      placeholder: |
+        Please describe:
+        - What you're trying to configure
+        - What you expected to happen
+        - What actually happened
+        - What you've already tried
+    validations:
+      required: true
+
+  - type: textarea
+    id: config-content
+    attributes:
+      label: 📄 Configuration Content
+      description: Provide relevant configuration (hide sensitive data like webhooks)
+      placeholder: |
+        ```yaml
+        notification:
+          enable_notification: true
+          webhooks:
+            telegram_bot_token: "***HIDDEN***"
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: error-messages
+    attributes:
+      label: ❌ Error Messages (if any)
+      description: Any error messages you're seeing
+      placeholder: |
+        ```
+        Error message here...
+        ```
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 📎 Additional Information
+      description: Any other relevant information
+      placeholder: |
+        - Operating system
+        - Python version
+        - Network environment
+        - Other relevant details

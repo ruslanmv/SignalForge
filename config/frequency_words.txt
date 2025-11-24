@@ -1,0 +1,95 @@
+# SignalForge Keyword Monitoring List
+# Add keywords you want to track in news (one per line)
+# Lines starting with ! are negation filters (exclude results)
+# Examples of different categories:
+
+# Technology Companies
+Apple
+Microsoft
+Google
+Amazon
+Meta
+Tesla
+SpaceX
+OpenAI
+ByteDance
+NVIDIA
+AMD
+DeepSeek
+
+# AI & Machine Learning
+AI
+!gai
+Artificial Intelligence
+Machine Learning
+ChatGPT
+GPT-4
+Claude
+Anthropic
+Gemini
+DeepMind
+Sora
+Neural Network
+LLM
+
+# Technology Products
+iPhone
+iPad
+Mac
+iOS
+HarmonyOS
+Android
+
+# Business Leaders
+Elon Musk
+Jensen Huang
+Sam Altman
+
+# Autonomous & Robotics
+Autonomous Driving
+Self-Driving
+Robot
+Robotics
+DJI
+
+# Semiconductors & Hardware
+Chip
+Semiconductor
+Lithography
+GPU
+CPU
+
+# Energy & Space
+Nuclear Energy
+Fusion
+Mars
+Moon Landing
+Spacecraft
+Space Exploration
+Aviation
+
+# Countries & Regions
+China
+USA
+United States
+Japan
+Korea
+Europe
+
+# General Tech Topics
+Technology
+Innovation
+Breakthrough
+Patent
+Research
+
+# Electric Vehicles
+Electric Vehicle
+EV
+BYD
+Battery
+
+# Entertainment & Media
+Netflix
+Streaming
+Gaming

@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+
+name: 💡 Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your feature suggestion! Please provide as much detail as possible.
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: 🏷️ Feature Category
+      options:
+        - Data sources (new platforms, improved crawling)
+        - Analytics features
+        - Notification methods
+        - Configuration management
+        - Deployment and operations
+        - Data visualization
+        - Performance optimization
+        - User experience
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 💭 Feature Description
+      description: Describe the feature you'd like to see
+      placeholder: |
+        Please describe:
+        - What feature you want to add
+        - How it should work
+        - What it would enable
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: 🎯 Use Case
+      description: When would you use this feature?
+      placeholder: |
+        For example:
+        - When I need to...
+        - In ... situations
+        - It would solve ... problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: 🛠️ Implementation Ideas (Optional)
+      description: If you have ideas about implementation, share them
+      placeholder: |
+        - How the UI should look
+        - Configuration options
+        - Reference similar tools
+        - Other suggestions
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any other information

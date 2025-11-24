@@ -1,0 +1,110 @@
+app:
+  version_check_url: "" # Version check URL (disabled - no longer using external repo)
+  show_version_update: false # Control version update notifications, if false, no version prompts
+
+crawler:
+  request_interval: 1000 # Request interval (milliseconds)
+  enable_crawler: true # Enable news crawling functionality, if false, program stops
+  use_proxy: false # Enable proxy, false to disable
+  default_proxy: "http://127.0.0.1:10086"
+
+# 🔸 daily (Daily Summary Mode)
+#   • Push timing: Scheduled push (default: every hour)
+#   • Content shown: All matching news for the day + new news section
+#   • Use case: Daily report summary, comprehensive trending topics overview
+#
+# 🔸 current (Current Rankings Mode)
+#   • Push timing: Scheduled push (default: every hour)
+#   • Content shown: Current rankings matching news + new news section
+#   • Use case: Real-time trending tracking, see what's hottest now
+#
+# 🔸 incremental (Incremental Monitoring Mode)
+#   • Push timing: Only push when there are new matches
+#   • Content shown: Newly appearing keyword matches
+#   • Use case: Avoid duplicate information
+
+# Report mode selection
+report:
+  mode: "daily" # Options: "daily"|"incremental"|"current"
+  rank_threshold: 5 # Ranking highlight threshold
+  sort_by_position_first: false # Sort priority: true=sort by config position first, false=sort by news count first
+  max_news_per_keyword: 0 # Max news items per keyword, 0=no limit
+
+notification:
+  enable_notification: true # Enable notification functionality, if false, no phone notifications sent
+  message_batch_size: 4000 # Message batch size (bytes) (don't change this setting)
+  dingtalk_batch_size: 20000 # DingTalk message batch size (bytes) (don't change this either)
+  feishu_batch_size: 29000 # Feishu message batch size (bytes)
+  batch_send_interval: 3 # Batch send interval (seconds)
+  feishu_message_separator: "━━━━━━━━━━━━━━━━━━━" # Feishu message separator
+
+  # 🕐 Push Time Window Control (Optional Feature)
+  # Purpose: Limit push time range to avoid disturbances during non-working hours
+  # Use cases:
+  #   - Only receive pushes during work hours (e.g., 09:00-18:00)
+  #   - Receive summary at fixed evening time (e.g., 20:00-22:00)
+  push_window:
+    enabled: false  # Enable push time window control, disabled by default
+    # Note: GitHub Actions execution time is unstable, time range should allow at least 2 hours
+    # For precise scheduled pushes, recommend using Docker deployment on personal server
+    time_range:
+      start: "20:00"  # Push window start time (Beijing time)
+      end: "22:00"    # Push window end time (Beijing time)
+    once_per_day: true  # Only push once per day within time window, if false, push every execution within window
+    push_record_retention_days: 7  # Push record retention days
+
+  # ⚠️⚠️⚠️ IMPORTANT SECURITY WARNING ⚠️⚠️⚠️
+  #
+  # 🔴 NEVER expose webhooks publicly!!!
+  # 🔴 If deploying via GitHub fork, DO NOT fill webhooks below
+  # 🔴 Instead, add them to GitHub Secrets (Settings → Secrets and variables → Actions)
+  # 🔴 Consequences of exposure:
+  #    - Minor: Spam notifications flooding your devices
+  #    - Severe: Webhook abuse leading to security incidents (malicious messages, phishing links, etc.)
+  #
+  webhooks:
+    feishu_url: "" # Feishu robot webhook URL
+    dingtalk_url: "" # DingTalk robot webhook URL
+    wework_url: "" # WeCom robot webhook URL
+    wework_msg_type: "markdown" # WeCom message type: markdown (group robot) or text (personal WeChat app)
+    telegram_bot_token: "" # Telegram Bot Token
+    telegram_chat_id: "" # Telegram Chat ID
+    email_from: "" # Sender email address
+    email_password: "" # Sender email password or authorization code
+    email_to: "" # Recipient email address, multiple recipients separated by commas
+    email_smtp_server: "" # SMTP server address (optional, auto-detect if empty)
+    email_smtp_port: "" # SMTP port (optional, auto-detect if empty)
+    ntfy_server_url: "https://ntfy.sh" # ntfy server address, defaults to public service, can change to self-hosted
+    ntfy_topic: "" # ntfy topic name
+    ntfy_token: "" # ntfy access token (optional, for private topics)
+
+# Used to make higher-priority news appear earlier, i.e., use algorithm to re-sort hot search rankings from different platforms to form your prioritized hot search, weights should sum to 1
+weight:
+  rank_weight: 0.6 # Ranking weight
+  frequency_weight: 0.3 # Frequency weight
+  hotness_weight: 0.1 # Hotness weight
+
+# Platform names can be defined arbitrarily and only serve display purposes. Even if you change names after the project has been running for days, it won't affect normal code operation
+platforms:
+  - id: "toutiao"
+    name: "Toutiao (Jinri Toutiao)"
+  - id: "baidu"
+    name: "Baidu Hot Search"
+  - id: "wallstreetcn-hot"
+    name: "Wallstreetcn Hot"
+  - id: "thepaper"
+    name: "The Paper"
+  - id: "bilibili-hot-search"
+    name: "bilibili Hot Search"
+  - id: "cls-hot"
+    name: "CLS Hot"
+  - id: "ifeng"
+    name: "iFeng"
+  - id: "tieba"
+    name: "Tieba"
+  - id: "weibo"
+    name: "Weibo"
+  - id: "douyin"
+    name: "Douyin"
+  - id: "zhihu"
+    name: "Zhihu"

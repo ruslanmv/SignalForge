@@ -1,0 +1,117 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+
+name: 🐛 Bug Report
+description: Report a bug or issue with SignalForge
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please provide as much detail as possible.
+
+  - type: dropdown
+    id: bug-category
+    attributes:
+      label: 🏷️ Bug Category
+      options:
+        - Data fetching issues
+        - Keyword filtering issues
+        - Notification issues
+        - Configuration issues
+        - Deployment issues
+        - Performance issues
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 🖥️ Environment
+      options:
+        - Local execution
+        - Docker
+        - GitHub Actions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 📝 Bug Description
+      description: Describe the bug in detail
+      placeholder: |
+        Please clearly describe:
+        - What happened
+        - When it happened
+        - What functionality was affected
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system-info
+    attributes:
+      label: 💻 Operating System
+      options:
+        - Windows 10
+        - Windows 11
+        - macOS
+        - Ubuntu/Linux
+        - Other
+        - Unknown
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. First, I...
+        2. Then, I...
+        3. The error occurred when...
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should have happened?
+      placeholder: Describe the expected behavior...
+    validations:
+      required: false
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: 📋 Error Logs
+      description: Any error messages or logs
+      placeholder: |
+        ```
+        Paste error logs here...
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: config-info
+    attributes:
+      label: ⚙️ Configuration
+      description: Relevant configuration (hide sensitive data)
+      placeholder: |
+        ```yaml
+        notification:
+          enable_notification: true
+          webhooks:
+            telegram_bot_token: "***HIDDEN***"
+        ```
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any other relevant information
