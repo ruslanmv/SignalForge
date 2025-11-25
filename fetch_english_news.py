@@ -12,20 +12,31 @@ import requests
 from collections import defaultdict
 import re
 from email.utils import parsedate_to_datetime
+import os
 
-# English Tech News Sources (RSS Feeds)
-NEWS_SOURCES = {
-    "Hacker News": "https://hnrss.org/frontpage",
-    "TechCrunch": "https://techcrunch.com/feed/",
-    "The Verge": "https://www.theverge.com/rss/index.xml",
-    "Ars Technica": "https://feeds.arstechnica.com/arstechnica/index",
-    "Wired": "https://www.wired.com/feed/rss",
-    "MIT Tech Review": "https://www.technologyreview.com/feed/",
-    "Engadget": "https://www.engadget.com/rss.xml",
-    "VentureBeat": "https://venturebeat.com/feed/",
-    "ZDNet": "https://www.zdnet.com/news/rss.xml",
-    "TechRadar": "https://www.techradar.com/rss"
-}
+
+def load_news_sources(filepath: str = "sources.json") -> Dict[str, str]:
+    """Load news sources from JSON configuration file"""
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+            return data.get("sources", {})
+    except FileNotFoundError:
+        print(f"⚠️  Warning: {filepath} not found, using default sources")
+        # Fallback to working sources if file doesn't exist
+        return {
+            "TechCrunch": "https://techcrunch.com/feed/",
+            "MIT Tech Review": "https://www.technologyreview.com/feed/",
+            "Engadget": "https://www.engadget.com/rss.xml",
+            "TechRadar": "https://www.techradar.com/rss"
+        }
+    except Exception as e:
+        print(f"⚠️  Error loading {filepath}: {e}")
+        return {}
+
+
+# Load news sources from configuration file
+NEWS_SOURCES = load_news_sources()
 
 # Tech keywords to categorize and filter news
 TECH_KEYWORDS = {

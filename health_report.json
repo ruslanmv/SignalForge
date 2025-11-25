@@ -1,0 +1,143 @@
+{
+  "checked_at": "2025-11-25T08:44:59.284299+00:00",
+  "total_sources": 15,
+  "healthy_sources": 11,
+  "failed_sources": 4,
+  "sources": [
+    {
+      "source": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "status": "healthy",
+      "items_found": 20,
+      "error": null,
+      "response_time": 0.11,
+      "last_item_date": "2025-11-25 04:42 UTC"
+    },
+    {
+      "source": "MIT Tech Review",
+      "url": "https://www.technologyreview.com/feed/",
+      "status": "healthy",
+      "items_found": 10,
+      "error": null,
+      "response_time": 0.32,
+      "last_item_date": "2025-11-24 16:30 UTC"
+    },
+    {
+      "source": "Engadget",
+      "url": "https://www.engadget.com/rss.xml",
+      "status": "healthy",
+      "items_found": 50,
+      "error": null,
+      "response_time": 0.64,
+      "last_item_date": "2025-11-25 08:03 UTC"
+    },
+    {
+      "source": "TechRadar",
+      "url": "https://www.techradar.com/rss",
+      "status": "healthy",
+      "items_found": 50,
+      "error": null,
+      "response_time": 0.25,
+      "last_item_date": "2025-11-25 08:01 UTC"
+    },
+    {
+      "source": "SiliconANGLE",
+      "url": "https://siliconangle.com/feed/",
+      "status": "healthy",
+      "items_found": 30,
+      "error": null,
+      "response_time": 0.36,
+      "last_item_date": "2025-11-25 01:12 UTC"
+    },
+    {
+      "source": "DevOps.com",
+      "url": "https://devops.com/feed/",
+      "status": "healthy",
+      "items_found": 10,
+      "error": null,
+      "response_time": 0.81,
+      "last_item_date": "2025-11-24 16:03 UTC"
+    },
+    {
+      "source": "TechSpot",
+      "url": "https://www.techspot.com/backend.xml",
+      "status": "healthy",
+      "items_found": 30,
+      "error": null,
+      "response_time": 0.28,
+      "last_item_date": "2025-11-24 22:01 UTC"
+    },
+    {
+      "source": "Tom's Hardware",
+      "url": "https://www.tomshardware.com/feeds/all",
+      "status": "healthy",
+      "items_found": 50,
+      "error": null,
+      "response_time": 0.32,
+      "last_item_date": "2025-11-24 19:45 UTC"
+    },
+    {
+      "source": "9to5Mac",
+      "url": "https://9to5mac.com/feed/",
+      "status": "error",
+      "items_found": 0,
+      "error": "HTTP 503",
+      "response_time": 0.56,
+      "last_item_date": null
+    },
+    {
+      "source": "9to5Google",
+      "url": "https://9to5google.com/feed/",
+      "status": "healthy",
+      "items_found": 25,
+      "error": null,
+      "response_time": 0.2,
+      "last_item_date": "2025-11-25 01:14 UTC"
+    },
+    {
+      "source": "Android Authority",
+      "url": "https://www.androidauthority.com/feed/",
+      "status": "healthy",
+      "items_found": 80,
+      "error": null,
+      "response_time": 0.31,
+      "last_item_date": "2025-11-25 08:40 UTC"
+    },
+    {
+      "source": "Gizmodo",
+      "url": "https://gizmodo.com/rss",
+      "status": "healthy",
+      "items_found": 20,
+      "error": null,
+      "response_time": 0.3,
+      "last_item_date": "2025-11-25 04:14 UTC"
+    },
+    {
+      "source": "CNET",
+      "url": "https://www.cnet.com/rss/news/",
+      "status": "error",
+      "items_found": 0,
+      "error": "HTTP 403",
+      "response_time": 0.3,
+      "last_item_date": null
+    },
+    {
+      "source": "PCWorld",
+      "url": "https://www.pcworld.com/index.rss",
+      "status": "error",
+      "items_found": 0,
+      "error": "HTTP 503",
+      "response_time": 0.47,
+      "last_item_date": null
+    },
+    {
+      "source": "Digital Trends",
+      "url": "https://www.digitaltrends.com/feed/",
+      "status": "error",
+      "items_found": 0,
+      "error": "Invalid XML: not well-formed (invalid token): line 2, column 18",
+      "response_time": 0.39,
+      "last_item_date": null
+    }
+  ]
+}

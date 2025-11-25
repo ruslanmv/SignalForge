@@ -1,0 +1,94 @@
+name: Check RSS Source Health
+
+on:
+  workflow_dispatch:  # Manual trigger only
+  schedule:
+    # Run health check every day at midnight UTC
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  check-sources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            check_sources_health.py
+            sources.json
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install requests --no-cache-dir
+
+      - name: Check RSS Source Health
+        id: health_check
+        continue-on-error: true
+        run: |
+          echo "🔍 Running RSS source health check..."
+          python check_sources_health.py
+
+      - name: Upload Health Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report-${{ github.run_number }}
+          path: health_report.json
+          retention-days: 30
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## 📊 RSS Source Health Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f health_report.json ]; then
+            # Parse JSON and display results
+            TOTAL=$(jq -r '.total_sources' health_report.json)
+            HEALTHY=$(jq -r '.healthy_sources' health_report.json)
+            FAILED=$(jq -r '.failed_sources' health_report.json)
+
+            echo "### Summary" >> $GITHUB_STEP_SUMMARY
+            echo "- **Total Sources:** $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- **✅ Healthy:** $HEALTHY" >> $GITHUB_STEP_SUMMARY
+            echo "- **❌ Failed:** $FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Success Rate:** $(echo "scale=1; $HEALTHY * 100 / $TOTAL" | bc)%" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # List healthy sources
+            echo "### ✅ Healthy Sources" >> $GITHUB_STEP_SUMMARY
+            jq -r '.sources[] | select(.status == "healthy") | "- **\(.source)** - \(.items_found) items, \(.response_time)s response"' health_report.json >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # List failed sources if any
+            if [ "$FAILED" -gt 0 ]; then
+              echo "### ❌ Failed Sources" >> $GITHUB_STEP_SUMMARY
+              jq -r '.sources[] | select(.status != "healthy") | "- **\(.source)** - \(.error)"' health_report.json >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ Health report not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Download the full health report from the artifacts section above." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check Status
+        if: steps.health_check.outcome == 'failure'
+        run: |
+          echo "⚠️ Some sources failed health check. Please review the health report."
+          echo "Consider updating sources.json with working alternatives."
+          exit 1
