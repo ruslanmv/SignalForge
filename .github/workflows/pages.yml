@@ -31,6 +31,8 @@ jobs:
         with:
           sparse-checkout: |
             fetch_english_news.py
+            sources.json
+            check_news_sources.py
             GITHUB_PAGES_SETUP.md
           sparse-checkout-cone-mode: false
 

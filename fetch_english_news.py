@@ -12,20 +12,34 @@ import requests
 from collections import defaultdict
 import re
 from email.utils import parsedate_to_datetime
+import os
 
-# English Tech News Sources (RSS Feeds)
-NEWS_SOURCES = {
-    "Hacker News": "https://hnrss.org/frontpage",
-    "TechCrunch": "https://techcrunch.com/feed/",
-    "The Verge": "https://www.theverge.com/rss/index.xml",
-    "Ars Technica": "https://feeds.arstechnica.com/arstechnica/index",
-    "Wired": "https://www.wired.com/feed/rss",
-    "MIT Tech Review": "https://www.technologyreview.com/feed/",
-    "Engadget": "https://www.engadget.com/rss.xml",
-    "VentureBeat": "https://venturebeat.com/feed/",
-    "ZDNet": "https://www.zdnet.com/news/rss.xml",
-    "TechRadar": "https://www.techradar.com/rss"
-}
+
+def load_sources_from_file(sources_file: str = "sources.json") -> Dict[str, str]:
+    """Load news sources from JSON configuration file"""
+    try:
+        if os.path.exists(sources_file):
+            with open(sources_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data.get('sources', {})
+    except Exception as e:
+        print(f"Warning: Could not load {sources_file}: {e}")
+
+    # Fallback to default sources
+    return {
+        "The Register": "https://www.theregister.com/headlines.atom",
+        "Hacker News": "https://hnrss.org/newest",
+        "Lobsters": "https://lobste.rs/rss",
+        "Phoronix": "https://www.phoronix.com/rss.php",
+        "Android Authority": "https://www.androidauthority.com/feed/",
+        "9to5Mac": "https://9to5mac.com/feed/",
+        "Bleeping Computer": "https://www.bleepingcomputer.com/feed/",
+        "The Hacker News": "https://feeds.feedburner.com/TheHackersNews"
+    }
+
+
+# Load sources from configuration file
+NEWS_SOURCES = load_sources_from_file()
 
 # Tech keywords to categorize and filter news
 TECH_KEYWORDS = {
@@ -61,6 +75,23 @@ TECH_KEYWORDS = {
 }
 
 
+def extract_text_from_element(elem) -> str:
+    """Robustly extract text from an XML element, handling CDATA and nested content"""
+    if elem is None:
+        return ''
+
+    # Try direct text first
+    if elem.text:
+        return elem.text.strip()
+
+    # Try itertext for nested elements and CDATA
+    text = ''.join(elem.itertext()).strip()
+    if text:
+        return text
+
+    return ''
+
+
 def fetch_news_from_source(source_name: str, feed_url: str, max_items: int = 10) -> List[Dict]:
     """Fetch news from a single RSS feed source"""
     news_items = []
@@ -68,11 +99,13 @@ def fetch_news_from_source(source_name: str, feed_url: str, max_items: int = 10)
     try:
         print(f"Fetching from {source_name}...")
 
-        # Fetch RSS feed
+        # Fetch RSS feed with robust headers
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+            'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            'Accept-Language': 'en-US,en;q=0.9'
         }
-        response = requests.get(feed_url, headers=headers, timeout=15)
+        response = requests.get(feed_url, headers=headers, timeout=20)
         response.raise_for_status()
 
         # Parse XML
@@ -83,32 +116,51 @@ def fetch_news_from_source(source_name: str, feed_url: str, max_items: int = 10)
         items = root.findall('.//item') or root.findall('.//{http://www.w3.org/2005/Atom}entry')
 
         for item in items[:max_items]:
-            # Get title
+            # Get title - try multiple methods
             title_elem = item.find('title') or item.find('{http://www.w3.org/2005/Atom}title')
-            title = title_elem.text if title_elem is not None else ''
+            title = extract_text_from_element(title_elem)
 
-            # Get link
+            # Skip items without titles
+            if not title:
+                continue
+
+            # Get link - handle both text content and href attribute
+            link = ''
             link_elem = item.find('link') or item.find('{http://www.w3.org/2005/Atom}link')
             if link_elem is not None:
                 link = link_elem.text if link_elem.text else link_elem.get('href', '')
-            else:
-                link = ''
+                link = link.strip() if link else ''
+
+            # Try guid as fallback for link
+            if not link:
+                guid_elem = item.find('guid')
+                if guid_elem is not None and guid_elem.text:
+                    link = guid_elem.text.strip()
+
+            # Skip items without valid links
+            if not link or not link.startswith('http'):
+                continue
 
             # Get publication date
             pub_date = None
-            for date_tag in ['pubDate', 'published', 'updated', '{http://www.w3.org/2005/Atom}published', '{http://www.w3.org/2005/Atom}updated']:
+            for date_tag in ['pubDate', 'published', 'updated',
+                           '{http://www.w3.org/2005/Atom}published',
+                           '{http://www.w3.org/2005/Atom}updated',
+                           'dc:date', '{http://purl.org/dc/elements/1.1/}date']:
                 date_elem = item.find(date_tag)
-                if date_elem is not None and date_elem.text:
-                    try:
-                        pub_date = parsedate_to_datetime(date_elem.text)
-                        break
-                    except:
+                if date_elem is not None:
+                    date_text = extract_text_from_element(date_elem)
+                    if date_text:
                         try:
-                            # Try ISO format
-                            pub_date = datetime.fromisoformat(date_elem.text.replace('Z', '+00:00'))
+                            pub_date = parsedate_to_datetime(date_text)
                             break
                         except:
-                            pass
+                            try:
+                                # Try ISO format
+                                pub_date = datetime.fromisoformat(date_text.replace('Z', '+00:00'))
+                                break
+                            except:
+                                pass
 
             if pub_date is None:
                 pub_date = datetime.now(timezone.utc)
@@ -117,7 +169,7 @@ def fetch_news_from_source(source_name: str, feed_url: str, max_items: int = 10)
 
             news_items.append({
                 'source': source_name,
-                'title': title.strip(),
+                'title': title,
                 'link': link,
                 'published': pub_date,
                 'timestamp': pub_date.timestamp()
@@ -125,8 +177,12 @@ def fetch_news_from_source(source_name: str, feed_url: str, max_items: int = 10)
 
         print(f"  ✓ Found {len(news_items)} items from {source_name}")
 
+    except requests.exceptions.RequestException as e:
+        print(f"  ✗ Network error fetching from {source_name}: {str(e)[:100]}")
+    except ET.ParseError as e:
+        print(f"  ✗ XML parse error from {source_name}: {str(e)[:100]}")
     except Exception as e:
-        print(f"  ✗ Error fetching from {source_name}: {str(e)}")
+        print(f"  ✗ Error fetching from {source_name}: {str(e)[:100]}")
 
     return news_items
 

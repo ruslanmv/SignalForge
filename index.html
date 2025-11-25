@@ -1,900 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SignalForge - Real-time English Tech News Aggregator">
+    <title>SignalForge - Tech News Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        * { box-sizing: border-box; }
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hot News Analysis</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <style>
-            * { box-sizing: border-box; }
-            body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-                margin: 0; 
-                padding: 16px; 
-                background: #fafafa;
-                color: #333;
-                line-height: 1.5;
-            }
-            
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background: white;
-                border-radius: 12px;
-                overflow: hidden;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                color: white;
-                padding: 32px 24px;
-                text-align: center;
-                position: relative;
-            }
-            
-            .save-buttons {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                display: flex;
-                gap: 8px;
-            }
-            
-            .save-btn {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 500;
-                transition: all 0.2s ease;
-                backdrop-filter: blur(10px);
-                white-space: nowrap;
-            }
-            
-            .save-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.5);
-                transform: translateY(-1px);
-            }
-            
-            .save-btn:active {
-                transform: translateY(0);
-            }
-            
-            .save-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-            
-            .header-title {
-                font-size: 22px;
-                font-weight: 700;
-                margin: 0 0 20px 0;
-            }
-            
-            .header-info {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-                font-size: 14px;
-                opacity: 0.95;
-            }
-            
-            .info-item {
-                text-align: center;
-            }
-            
-            .info-label {
-                display: block;
-                font-size: 12px;
-                opacity: 0.8;
-                margin-bottom: 4px;
-            }
-            
-            .info-value {
-                font-weight: 600;
-                font-size: 16px;
-            }
-            
-            .content {
-                padding: 24px;
-            }
-            
-            .word-group {
-                margin-bottom: 40px;
-            }
-            
-            .word-group:first-child {
-                margin-top: 0;
-            }
-            
-            .word-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #f0f0f0;
-            }
-            
-            .word-info {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-            
-            .word-name {
-                font-size: 17px;
-                font-weight: 600;
-                color: #1a1a1a;
-            }
-            
-            .word-count {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-            }
-            
-            .word-count.hot { color: #dc2626; font-weight: 600; }
-            .word-count.warm { color: #ea580c; font-weight: 600; }
-            
-            .word-index {
-                color: #999;
-                font-size: 12px;
-            }
-            
-            .news-item {
-                margin-bottom: 20px;
-                padding: 16px 0;
-                border-bottom: 1px solid #f5f5f5;
-                position: relative;
-                display: flex;
-                gap: 12px;
-                align-items: center;
-            }
-            
-            .news-item:last-child {
-                border-bottom: none;
-            }
-            
-            .news-item.new::after {
-                content: "NEW";
-                position: absolute;
-                top: 12px;
-                right: 0;
-                background: #fbbf24;
-                color: #92400e;
-                font-size: 9px;
-                font-weight: 700;
-                padding: 3px 6px;
-                border-radius: 4px;
-                letter-spacing: 0.5px;
-            }
-            
-            .news-number {
-                color: #999;
-                font-size: 13px;
-                font-weight: 600;
-                min-width: 20px;
-                text-align: center;
-                flex-shrink: 0;
-                background: #f8f9fa;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                align-self: flex-start;
-                margin-top: 8px;
-            }
-            
-            .news-content {
-                flex: 1;
-                min-width: 0;
-                padding-right: 40px;
-            }
-            
-            .news-item.new .news-content {
-                padding-right: 50px;
-            }
-            
-            .news-header {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
-                flex-wrap: wrap;
-            }
-            
-            .source-name {
-                color: #666;
-                font-size: 12px;
-                font-weight: 500;
-            }
-            
-            .rank-num {
-                color: #fff;
-                background: #6b7280;
-                font-size: 10px;
-                font-weight: 700;
-                padding: 2px 6px;
-                border-radius: 10px;
-                min-width: 18px;
-                text-align: center;
-            }
-            
-            .rank-num.top { background: #dc2626; }
-            .rank-num.high { background: #ea580c; }
-            
-            .time-info {
-                color: #999;
-                font-size: 11px;
-            }
-            
-            .count-info {
-                color: #059669;
-                font-size: 11px;
-                font-weight: 500;
-            }
-            
-            .news-title {
-                font-size: 15px;
-                line-height: 1.4;
-                color: #1a1a1a;
-                margin: 0;
-            }
-            
-            .news-link {
-                color: #2563eb;
-                text-decoration: none;
-            }
-            
-            .news-link:hover {
-                text-decoration: underline;
-            }
-            
-            .news-link:visited {
-                color: #7c3aed;
-            }
-            
-            .new-section {
-                margin-top: 40px;
-                padding-top: 24px;
-                border-top: 2px solid #f0f0f0;
-            }
-            
-            .new-section-title {
-                color: #1a1a1a;
-                font-size: 16px;
-                font-weight: 600;
-                margin: 0 0 20px 0;
-            }
-            
-            .new-source-group {
-                margin-bottom: 24px;
-            }
-            
-            .new-source-title {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-                margin: 0 0 12px 0;
-                padding-bottom: 6px;
-                border-bottom: 1px solid #f5f5f5;
-            }
-            
-            .new-item {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 8px 0;
-                border-bottom: 1px solid #f9f9f9;
-            }
-            
-            .new-item:last-child {
-                border-bottom: none;
-            }
-            
-            .new-item-number {
-                color: #999;
-                font-size: 12px;
-                font-weight: 600;
-                min-width: 18px;
-                text-align: center;
-                flex-shrink: 0;
-                background: #f8f9fa;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .new-item-rank {
-                color: #fff;
-                background: #6b7280;
-                font-size: 10px;
-                font-weight: 700;
-                padding: 3px 6px;
-                border-radius: 8px;
-                min-width: 20px;
-                text-align: center;
-                flex-shrink: 0;
-            }
-            
-            .new-item-rank.top { background: #dc2626; }
-            .new-item-rank.high { background: #ea580c; }
-            
-            .new-item-content {
-                flex: 1;
-                min-width: 0;
-            }
-            
-            .new-item-title {
-                font-size: 14px;
-                line-height: 1.4;
-                color: #1a1a1a;
-                margin: 0;
-            }
-            
-            .error-section {
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-                border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 24px;
-            }
-            
-            .error-title {
-                color: #dc2626;
-                font-size: 14px;
-                font-weight: 600;
-                margin: 0 0 8px 0;
-            }
-            
-            .error-list {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .error-item {
-                color: #991b1b;
-                font-size: 13px;
-                padding: 2px 0;
-                font-family: 'SF Mono', Consolas, monospace;
-            }
-            
-            .footer {
-                margin-top: 32px;
-                padding: 20px 24px;
-                background: #f8f9fa;
-                border-top: 1px solid #e5e7eb;
-                text-align: center;
-            }
-            
-            .footer-content {
-                font-size: 13px;
-                color: #6b7280;
-                line-height: 1.6;
-            }
-            
-            .footer-link {
-                color: #4f46e5;
-                text-decoration: none;
-                font-weight: 500;
-                transition: color 0.2s ease;
-            }
-            
-            .footer-link:hover {
-                color: #7c3aed;
-                text-decoration: underline;
-            }
-            
-            .project-name {
-                font-weight: 600;
-                color: #374151;
-            }
-            
-            @media (max-width: 480px) {
-                body { padding: 12px; }
-                .header { padding: 24px 20px; }
-                .content { padding: 20px; }
-                .footer { padding: 16px 20px; }
-                .header-info { grid-template-columns: 1fr; gap: 12px; }
-                .news-header { gap: 6px; }
-                .news-content { padding-right: 45px; }
-                .news-item { gap: 8px; }
-                .new-item { gap: 8px; }
-                .news-number { width: 20px; height: 20px; font-size: 12px; }
-                .save-buttons {
-                    position: static;
-                    margin-bottom: 16px;
-                    display: flex;
-                    gap: 8px;
-                    justify-content: center;
-                    flex-direction: column;
-                    width: 100%;
-                }
-                .save-btn {
-                    width: 100%;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <div class="save-buttons">
-                    <button class="save-btn" onclick="saveAsImage()">Save as Image</button>
-                    <button class="save-btn" onclick="saveAsMultipleImages()">Save in Segments</button>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 32px;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 24px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .category-section {
+            margin-bottom: 48px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #e5e7eb;
+        }
+
+        .category-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-icon {
+            font-size: 24px;
+        }
+
+        .category-count {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .news-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .news-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-color: #3b82f6;
+        }
+
+        .news-card:hover::before {
+            opacity: 1;
+        }
+
+        .news-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .news-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3b82f6;
+            border: 1px solid #dbeafe;
+        }
+
+        .news-time {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .news-title {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .news-link {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .news-link:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #f1f5f9;
+            padding: 32px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer-content {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .footer-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: #1e40af;
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header { padding: 32px 24px; }
+            .content { padding: 24px 20px; }
+            .header-title { font-size: 26px; }
+            .category-title { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">🚀 SignalForge Tech News</div>
+            <div class="header-subtitle">Real-time aggregation from leading English tech publications</div>
+
+            <div class="header-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Articles</div>
+                    <div class="stat-value">37</div>
                 </div>
-                <div class="header-title">Hot News Analysis</div>
-                <div class="header-info">
-                    <div class="info-item">
-                        <span class="info-label">Report Type</span>
-                        <span class="info-value">Daily summary</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Total News</span>
-                        <span class="info-value">254  items</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Hot News</span>
-                        <span class="info-value">9  items</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Generation Time</span>
-                        <span class="info-value">11-25 19:09</span>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-label">Categories</div>
+                    <div class="stat-value">1</div>
                 </div>
-            </div>
-            
-            <div class="content">
-                <div class="word-group">
-                    <div class="word-header">
-                        <div class="word-info">
-                            <div class="word-name"># AI &amp; Machine Learning AI Artificial Intelligence Machine Learning ChatGPT GPT-4 Claude Anthropic Gemini DeepMind Sora Neural Network LLM</div>
-                            <div class="word-count warm">7  items</div>
-                        </div>
-                        <div class="word-index">1/3</div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">1</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">Zhihu</span><span class="rank-num top">2</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://www.zhihu.com/question/1976013755256153204" target="_blank" class="news-link">35 岁大厂程序员，花了 3 周写的核心算法，AI 用 10 分钟复现了更优版本，我 10 年的经验到底值多少钱？</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">2</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">CLS Hot</span><span class="rank-num high">4</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://www.cls.cn/detail/2209826" target="_blank" class="news-link">垂直整合程度最高的AI大厂！“新王”谷歌登基：整个硅谷都在颤抖？</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">3</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">Wallstreetcn Hot</span><span class="rank-num high">5</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://wallstreetcn.com/articles/3760049" target="_blank" class="news-link">准时上演！“大空头”大战英伟达，“AI泡沫”论战开启</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">4</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">CLS Hot</span><span class="rank-num ">6</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://www.cls.cn/detail/2210415" target="_blank" class="news-link">AI需求引爆！一周涨30%，存储产业链涨价扩展到SSD</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">5</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">Wallstreetcn Hot</span><span class="rank-num ">7</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://wallstreetcn.com/articles/3760047" target="_blank" class="news-link">趁Gemini 3“东风”，“谷歌链”挑战“英伟达链”，颠覆AI交易格局</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">6</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">CLS Hot</span><span class="rank-num ">11</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://www.cls.cn/detail/2210324" target="_blank" class="news-link">【每日收评】三大指数放量反弹！全市场连续两日逾百股涨超9%，AI概念股再度活跃</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">7</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">Tieba</span><span class="rank-num ">25</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://tieba.baidu.com/hottopic/browse/hottopic?topic_id=28347461&amp;amp;topic_name=%E4%B8%A4%E7%BE%8E%E5%88%80%E9%80%BC%E7%96%AFAI%21%E6%80%92%E8%A6%81%E6%8A%A5%E5%AE%98%E5%91%8A%E5%85%AC%E5%8F%B8" target="_blank" class="news-link">两美刀逼疯AI!怒要报官告公司</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="word-group">
-                    <div class="word-header">
-                        <div class="word-info">
-                            <div class="word-name"># Technology Companies Apple Microsoft Google Amazon Meta Tesla SpaceX OpenAI ByteDance NVIDIA AMD DeepSeek</div>
-                            <div class="word-count ">1  items</div>
-                        </div>
-                        <div class="word-index">2/3</div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">1</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">CLS Hot</span><span class="rank-num high">5</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://www.cls.cn/detail/2210305" target="_blank" class="news-link">AI芯片竞赛升级！Meta据悉转向谷歌TPU 英伟达“王位”不稳？</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="word-group">
-                    <div class="word-header">
-                        <div class="word-info">
-                            <div class="word-name"># Semiconductors &amp; Hardware Chip Semiconductor Lithography GPU CPU</div>
-                            <div class="word-count ">1  items</div>
-                        </div>
-                        <div class="word-index">3/3</div>
-                    </div>
-                    <div class="news-item ">
-                        <div class="news-number">1</div>
-                        <div class="news-content">
-                            <div class="news-header">
-                                <span class="source-name">Wallstreetcn Hot</span><span class="rank-num high">4</span><span class="time-info">19:09</span>
-                            </div>
-                            <div class="news-title"><a href="https://wallstreetcn.com/articles/3760014" target="_blank" class="news-link">网上中签率0.02423369%，网下申购倍数近1600倍！&quot;国产GPU第一股&quot;摩尔线程启动申购遭疯抢</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <div class="footer-content">
-                    Powered by <span class="project-name">SignalForge</span> generated · 
-                    <a href="https://github.com/ruslanmv/SignalForge" target="_blank" class="footer-link">
-                        GitHub Open Source Project
-                    </a>
+                <div class="stat-card">
+                    <div class="stat-label">Last Updated</div>
+                    <div class="stat-value" style="font-size: 18px;">11-25 07:35 UTC</div>
                 </div>
             </div>
         </div>
-        
-        <script>
-            async function saveAsImage() {
-                const button = event.target;
-                const originalText = button.textContent;
-                
-                try {
-                    button.textContent = 'Generating...';
-                    button.disabled = true;
-                    window.scrollTo(0, 0);
 
-                    // Wait for page to stabilize
-                    await new Promise(resolve => setTimeout(resolve, 200));
+        <div class="content">
 
-                    // Hide button before screenshot
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'hidden';
+            <div class="category-section">
+                <div class="category-header">
+                    <div class="category-title">
+                        <span class="category-icon">📰</span>
+                        General Tech News
+                    </div>
+                    <div class="category-count">37 articles</div>
+                </div>
 
-                    // Wait again to ensure button is completely hidden
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    const container = document.querySelector('.container');
-                    
-                    const canvas = await html2canvas(container, {
-                        backgroundColor: '#ffffff',
-                        scale: 1.5,
-                        useCORS: true,
-                        allowTaint: false,
-                        imageTimeout: 10000,
-                        removeContainer: false,
-                        foreignObjectRendering: false,
-                        logging: false,
-                        width: container.offsetWidth,
-                        height: container.offsetHeight,
-                        x: 0,
-                        y: 0,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: window.innerWidth,
-                        windowHeight: window.innerHeight
-                    });
-                    
-                    buttons.style.visibility = 'visible';
-                    
-                    const link = document.createElement('a');
-                    const now = new Date();
-                    const filename = `SignalForge_Hot News Analysis_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.png`;
-                    
-                    link.download = filename;
-                    link.href = canvas.toDataURL('image/png', 1.0);
+                <div class="news-grid">
 
-                    // Trigger download
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 Engadget</span>
+                            <span class="news-time">🕐 Nov 25, 07:00 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    button.textContent = 'Saved successfully!';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 Engadget</span>
+                            <span class="news-time">🕐 Nov 25, 06:01 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                } catch (error) {
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'visible';
-                    button.textContent = 'Save failed';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
-                }
-            }
-            
-            async function saveAsMultipleImages() {
-                const button = event.target;
-                const originalText = button.textContent;
-                const container = document.querySelector('.container');
-                const scale = 1.5; 
-                const maxHeight = 5000 / scale;
-                
-                try {
-                    button.textContent = 'Analyzing...';
-                    button.disabled = true;
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 25, 06:00 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Fetch all possible split elements
-                    const newsItems = Array.from(container.querySelectorAll('.news-item'));
-                    const wordGroups = Array.from(container.querySelectorAll('.word-group'));
-                    const newSection = container.querySelector('.new-section');
-                    const errorSection = container.querySelector('.error-section');
-                    const header = container.querySelector('.header');
-                    const footer = container.querySelector('.footer');
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 25, 05:42 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Calculate element positions and heights
-                    const containerRect = container.getBoundingClientRect();
-                    const elements = [];
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechCrunch</span>
+                            <span class="news-time">🕐 Nov 25, 04:42 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Add header as required element
-                    elements.push({
-                        type: 'header',
-                        element: header,
-                        top: 0,
-                        bottom: header.offsetHeight,
-                        height: header.offsetHeight
-                    });
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 Engadget</span>
+                            <span class="news-time">🕐 Nov 25, 04:35 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Add error info (if exists)
-                    if (errorSection) {
-                        const rect = errorSection.getBoundingClientRect();
-                        elements.push({
-                            type: 'error',
-                            element: errorSection,
-                            top: rect.top - containerRect.top,
-                            bottom: rect.bottom - containerRect.top,
-                            height: rect.height
-                        });
-                    }
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 25, 00:59 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Group process news-items by word-group
-                    wordGroups.forEach(group => {
-                        const groupRect = group.getBoundingClientRect();
-                        const groupNewsItems = group.querySelectorAll('.news-item');
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 25, 00:35 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                        // Add word-group header section
-                        const wordHeader = group.querySelector('.word-header');
-                        if (wordHeader) {
-                            const headerRect = wordHeader.getBoundingClientRect();
-                            elements.push({
-                                type: 'word-header',
-                                element: wordHeader,
-                                parent: group,
-                                top: groupRect.top - containerRect.top,
-                                bottom: headerRect.bottom - containerRect.top,
-                                height: headerRect.height
-                            });
-                        }
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechCrunch</span>
+                            <span class="news-time">🕐 Nov 25, 00:30 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                        // Add each news-item
-                        groupNewsItems.forEach(item => {
-                            const rect = item.getBoundingClientRect();
-                            elements.push({
-                                type: 'news-item',
-                                element: item,
-                                parent: group,
-                                top: rect.top - containerRect.top,
-                                bottom: rect.bottom - containerRect.top,
-                                height: rect.height
-                            });
-                        });
-                    });
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 Engadget</span>
+                            <span class="news-time">🕐 Nov 25, 00:25 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Add new news section
-                    if (newSection) {
-                        const rect = newSection.getBoundingClientRect();
-                        elements.push({
-                            type: 'new-section',
-                            element: newSection,
-                            top: rect.top - containerRect.top,
-                            bottom: rect.bottom - containerRect.top,
-                            height: rect.height
-                        });
-                    }
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 25, 00:00 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Add footer
-                    const footerRect = footer.getBoundingClientRect();
-                    elements.push({
-                        type: 'footer',
-                        element: footer,
-                        top: footerRect.top - containerRect.top,
-                        bottom: footerRect.bottom - containerRect.top,
-                        height: footer.offsetHeight
-                    });
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 24, 23:34 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 24, 23:34 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    // Calculate split points
-                    const segments = [];
-                    let currentSegment = { start: 0, end: 0, height: 0, includeHeader: true };
-                    let headerHeight = header.offsetHeight;
-                    currentSegment.height = headerHeight;
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechRadar</span>
+                            <span class="news-time">🕐 Nov 24, 23:25 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                    for (let i = 1; i < elements.length; i++) {
-                        const element = elements[i];
-                        const potentialHeight = element.bottom - currentSegment.start;
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-source">📡 TechCrunch</span>
+                            <span class="news-time">🕐 Nov 24, 22:59 UTC</span>
+                        </div>
+                        <div class="news-title">
+                            <a href="" target="_blank" rel="noopener noreferrer" class="news-link">
+                                
+                            </a>
+                        </div>
+                    </div>
 
-                        // Check if need to create new segment
-                        if (potentialHeight > maxHeight && currentSegment.height > headerHeight) {
-                            // Split at previous element end
-                            currentSegment.end = elements[i - 1].bottom;
-                            segments.push(currentSegment);
+                </div>
+            </div>
 
-                            // Start new segment
-                            currentSegment = {
-                                start: currentSegment.end,
-                                end: 0,
-                                height: element.bottom - currentSegment.end,
-                                includeHeader: false
-                            };
-                        } else {
-                            currentSegment.height = potentialHeight;
-                            currentSegment.end = element.bottom;
-                        }
-                    }
+        </div>
 
-                    // Add last segment
-                    if (currentSegment.height > 0) {
-                        currentSegment.end = container.offsetHeight;
-                        segments.push(currentSegment);
-                    }
-
-                    button.textContent = `Generating (0/${segments.length})...`;
-
-                    // Hide save button
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'hidden';
-
-                    // Generate image for each segment
-                    const images = [];
-                    for (let i = 0; i < segments.length; i++) {
-                        const segment = segments[i];
-                        button.textContent = `Generating (${i + 1}/${segments.length})...`;
-
-                        // Create temporary container for screenshot
-                        const tempContainer = document.createElement('div');
-                        tempContainer.style.cssText = `
-                            position: absolute;
-                            left: -9999px;
-                            top: 0;
-                            width: ${container.offsetWidth}px;
-                            background: white;
-                        `;
-                        tempContainer.className = 'container';
-
-                        // Clone container content
-                        const clonedContainer = container.cloneNode(true);
-
-                        // Remove save button from cloned content
-                        const clonedButtons = clonedContainer.querySelector('.save-buttons');
-                        if (clonedButtons) {
-                            clonedButtons.style.display = 'none';
-                        }
-
-                        tempContainer.appendChild(clonedContainer);
-                        document.body.appendChild(tempContainer);
-
-                        // Wait for DOM update
-                        await new Promise(resolve => setTimeout(resolve, 100));
-
-                        // Use html2canvas to capture specific area
-                        const canvas = await html2canvas(clonedContainer, {
-                            backgroundColor: '#ffffff',
-                            scale: scale,
-                            useCORS: true,
-                            allowTaint: false,
-                            imageTimeout: 10000,
-                            logging: false,
-                            width: container.offsetWidth,
-                            height: segment.end - segment.start,
-                            x: 0,
-                            y: segment.start,
-                            windowWidth: window.innerWidth,
-                            windowHeight: window.innerHeight
-                        });
-                        
-                        images.push(canvas.toDataURL('image/png', 1.0));
-
-                        // Clean up temporary container
-                        document.body.removeChild(tempContainer);
-                    }
-
-                    // Restore button display
-                    buttons.style.visibility = 'visible';
-
-                    // Download all images
-                    const now = new Date();
-                    const baseFilename = `SignalForge_Hot News Analysis_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-
-                    for (let i = 0; i < images.length; i++) {
-                        const link = document.createElement('a');
-                        link.download = `${baseFilename}_part${i + 1}.png`;
-                        link.href = images[i];
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-
-                        // Delay to avoid browser blocking multiple downloads
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-
-                    button.textContent = `Saved ${segments.length}  images!`;
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
-
-                } catch (error) {
-                    console.error('Save in segments failed:', error);
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'visible';
-                    button.textContent = 'Save failed';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
-                }
-            }
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                window.scrollTo(0, 0);
-            });
-        </script>
-    </body>
-    </html>
-    
+        <div class="footer">
+            <div class="footer-content">
+                <strong>Powered by SignalForge</strong> 🔥<br>
+                An open-source tech news aggregator · Auto-updated every hour<br>
+                <a href="https://github.com/ruslanmv/SignalForge" target="_blank" rel="noopener noreferrer" class="footer-link">
+                    View on GitHub ⭐
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
