@@ -1,0 +1,109 @@
+name: Update GitHub Pages with English Tech News
+
+on:
+  schedule:
+    # Run every hour
+    - cron: "0 * * * *"
+  workflow_dispatch:  # Allow manual trigger
+  push:
+    branches:
+      - master
+      - main
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            fetch_english_news.py
+            GITHUB_PAGES_SETUP.md
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install requests --no-cache-dir
+
+      - name: Fetch English Tech News
+        id: fetch_news
+        run: |
+          echo "🚀 Fetching English tech news..."
+          python fetch_english_news.py
+
+          # Verify index.html was created
+          if [ ! -f index.html ]; then
+            echo "❌ Error: index.html was not generated"
+            exit 1
+          fi
+
+          echo "✅ Successfully generated index.html"
+          ls -lh index.html
+
+      - name: Verification Report
+        if: always()
+        run: |
+          echo "## Installation Verification Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Python Version: $(python --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ steps.fetch_news.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f index.html ]; then
+            echo "- Generated File: ✅ index.html ($(stat -f%z index.html 2>/dev/null || stat -c%s index.html) bytes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Generated File: ❌ index.html not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create deployment directory
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp GITHUB_PAGES_SETUP.md _site/ 2>/dev/null || true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
