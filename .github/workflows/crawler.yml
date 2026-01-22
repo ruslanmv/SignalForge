@@ -5,7 +5,8 @@ on:
     # We use GitHub's official runner resources, and each account has a limited quota.
     # To avoid being flagged for abuse and risking account suspension,
     # it is not recommended to set the interval shorter than 30 minutes.
-    - cron: "0 * * * *" # Run at the beginning of every hour (may have some deviation),
+    - cron: "0 8,20 * * *" # Runs at minute 0 of the 8th and 20th hour
+                        #"0 * * * *" # Run at the beginning of every hour (may have some deviation),
                         # or use "*/30 * * * *" (run every 30 minutes),
                         # or "*/30 0-14 * * *" (run every 30 minutes from 00:00 to 14:00 UTC every day).
                         # Remember: GitHub Actions cron uses UTC; convert to your local CET/Europe/Rome time if needed.
